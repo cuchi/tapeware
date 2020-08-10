@@ -3,5 +3,6 @@
   "version": "0.1.0",
   "main": "index.js",
   "author": "Paulo Henrique Cuchi <paulo.cuchi@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {}
 }
