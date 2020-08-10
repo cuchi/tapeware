@@ -4,17 +4,22 @@ const { createHash } = require('crypto')
 const nodeFs = require('fs')
 const { join } = require('path')
 
-const { createReadStream } = nodeFs
+const { createReadStream, createWriteStream } = nodeFs
 const fs = nodeFs.promises
 
+const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 8080
 const recordUrl = process.env.RECORD_URL
 const recordPort = process.env.RECORD_PORT || 443
 const tapesDir = process.env.TAPES_DIR || 'tapes'
 
+// Let's not care about that for a while
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 const serverState = {}
 
 function getTapeDir(data) {
+    // TODO: don't hash the entire request
     const hash = createHash('sha256').update(data).digest('hex')
     return { tapeDir: join(tapesDir, hash), hash }
 }
@@ -33,20 +38,17 @@ function record(clientSocket) {
     const serverSocket = agent
         .createConnection({ host: recordUrl, port: recordPort })
     
-    clientSocket.pipe(serverSocket) // TODO: Fix headers (connection, host, ...)
     clientSocket.on('data', async data => {
-        const { tapeDir } = getTapeDir(data)
+        const newData = data.toString().replace(`${host}:${port}`, recordUrl)
+        serverSocket.write(Buffer.from(newData))
 
-        const responseData = []
+        const { tapeDir } = getTapeDir(data)
+        await fs.mkdir(tapeDir, { recursive: true })
+
         serverSocket.pipe(clientSocket)
-        serverSocket.on('data', data => responseData.push(data))
-        serverSocket.on('end', async () => {
-            await fs.mkdir(tapeDir, { recursive: true })
-            await fs.writeFile(
-                join(tapeDir, (await getLastEntry(tapeDir) + 1).toString()),
-                responseData.join('')
-            )
-        })
+        serverSocket.pipe(createWriteStream(
+            join(tapeDir, (await getLastEntry(tapeDir) + 1).toString())
+        ))
     })
 }
 
