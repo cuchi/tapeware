@@ -22,7 +22,7 @@ app.put("/services/:name", (req, res) => {
   }
 
   const config = getConfig();
-  if (config[name]) {
+  if (!config[name]) {
     // TODO handle ["name"] should exist
   }
 
