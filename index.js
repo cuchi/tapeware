@@ -1,26 +1,25 @@
 const http = require('http')
-const https = require('https')
-const { createHash } = require('crypto')
+const proxy = require('http-proxy')
 const nodeFs = require('fs')
 const { join } = require('path')
-
+const hashObject = require('object-hash')
 const { createReadStream, createWriteStream } = nodeFs
+
 const fs = nodeFs.promises
 
-const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 8080
-const recordUrl = process.env.RECORD_URL
-const recordPort = process.env.RECORD_PORT || 443
+const targetUrl = process.env.TARGET
+const targetPort = process.env.TARGET_PORT || 443
 const tapesDir = process.env.TAPES_DIR || 'tapes'
-
-// Let's not care about that for a while
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const serverState = {}
 
-function getTapeDir(data) {
-    // TODO: don't hash the entire request
-    const hash = createHash('sha256').update(data).digest('hex')
+function getTapeDir(req) {
+    const hash = hashObject({
+        path: req.path,
+        headers: req.headers,
+        body: req.body
+    })
     return { tapeDir: join(tapesDir, hash), hash }
 }
 
@@ -33,28 +32,41 @@ async function getLastEntry(tapeDir) {
     )
 }
 
-function record(clientSocket) {
-    const agent = new https.Agent()
-    const serverSocket = agent
-        .createConnection({ host: recordUrl, port: recordPort })
-    
-    clientSocket.on('data', async data => {
-        const newData = data.toString().replace(`${host}:${port}`, recordUrl)
-        serverSocket.write(Buffer.from(newData))
+function sanitizeRequest(req) {
+    req.setHeader('host', targetUrl)
+}
 
-        const { tapeDir } = getTapeDir(data)
+function record() {
+    const server = proxy
+        .createProxyServer({
+            target: `https://${targetUrl}:${targetPort}`,
+            secure: false
+        })
+        .listen(port)
+
+    server.on('proxyReq', async req => {
+        sanitizeRequest(req)
+        const { tapeDir } = getTapeDir(req)
+
         await fs.mkdir(tapeDir, { recursive: true })
-
-        serverSocket.pipe(clientSocket)
-        serverSocket.pipe(createWriteStream(
+        req.socket.pipe(createWriteStream(
             join(tapeDir, (await getLastEntry(tapeDir) + 1).toString())
         ))
     })
 }
 
-function play(clientSocket) {
-    clientSocket.on('data', async data => {
-        const { tapeDir, hash } = getTapeDir(data)
+function play() {
+    const dummyServer = http.createServer()
+    dummyServer.listen(0)
+
+    const proxyServer = proxy
+        .createProxyServer({
+            target: `http://localhost:${dummyServer.address().port}`
+        })
+        .listen(port)
+    proxyServer.on('proxyReq', async (req, _req, res) => {
+        sanitizeRequest(req)
+        const { tapeDir, hash } = getTapeDir(req)
         const currentEntry = serverState[hash] || 1
         serverState[hash] = currentEntry + 1
         try {
@@ -63,14 +75,19 @@ function play(clientSocket) {
                 ? lastEntry
                 : currentEntry % lastEntry
             createReadStream(join(tapeDir, nextEntry.toString()))
-                .pipe(clientSocket)
+                .pipe(res.socket)
         } catch (error) {
             console.error(`Unknown request ${hash}`)
-            clientSocket.write('HTTP/1.1 501 Not Implemented\n\n')
-            clientSocket.end()
+            res.socket.write('HTTP/1.1 501 Not Implemented\n\n')
+            res.socket.end()
         }
     })
 }
 
-const server = http.createServer().listen(port)
-server.on('connection', recordUrl ? record : play)
+if (['r', 'rec', 'record'].includes(process.argv[2])) {
+    console.log(`Recording tapes for target ${targetUrl}...`)
+    record()
+} else {
+    console.log(`Playing recorded tapes from target ${targetUrl}`)
+    play()
+}
