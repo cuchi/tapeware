@@ -11,14 +11,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:9001/services",
-					"protocol": "http",
+					"raw": "{{BASE_URL}}{{MOCKED_URLS}}",
 					"host": [
-						"localhost"
-					],
-					"port": "9001",
-					"path": [
-						"services"
+						"{{BASE_URL}}{{MOCKED_URLS}}"
 					]
 				}
 			},
@@ -29,29 +24,22 @@
 			"request": {
 				"method": "PUT",
 				"header": [],
-				"url": {
-					"raw": "http://localhost:9001/services?name=ACCOUNT&url=b&port=1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9001",
-					"path": [
-						"services"
-					],
-					"query": [
-						{
-							"key": "name",
-							"value": "ACCOUNT"
-						},
-						{
-							"key": "url",
-							"value": "b"
-						},
-						{
-							"key": "port",
-							"value": "1"
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"url\": \"some.url.com\",\n    \"port\": 123\n}",
+					"options": {
+						"raw": {
+							"language": "json"
 						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}{{MOCKED_URLS}}/someName",
+					"host": [
+						"{{BASE_URL}}{{MOCKED_URLS}}"
+					],
+					"path": [
+						"someName"
 					]
 				}
 			},
@@ -63,15 +51,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:9001/services/ACCOUNT",
-					"protocol": "http",
+					"raw": "{{BASE_URL}}{{MOCKED_URLS}}/someName",
 					"host": [
-						"localhost"
+						"{{BASE_URL}}{{MOCKED_URLS}}"
 					],
-					"port": "9001",
 					"path": [
-						"services",
-						"ACCOUNT"
+						"someName"
 					]
 				}
 			},
@@ -84,7 +69,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"\",\n    \"url\": \"\",\n    \"port\": 1\n}",
+					"raw": "{\n    \"name\": \"soimeName\",\n    \"url\": \"name.com\",\n    \"port\": 123\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -92,14 +77,9 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:9001/services",
-					"protocol": "http",
+					"raw": "{{BASE_URL}}{{MOCKED_URLS}}",
 					"host": [
-						"localhost"
-					],
-					"port": "9001",
-					"path": [
-						"services"
+						"{{BASE_URL}}{{MOCKED_URLS}}"
 					]
 				}
 			},
