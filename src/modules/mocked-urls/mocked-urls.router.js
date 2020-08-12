@@ -7,7 +7,11 @@ const {
 } = require('./mocked-urls.service');
 const { getMockedUrls } = require('./mocked-urls.repository');
 
-const { validateCreationFields, validateUpdateFields, validateDeleteParam } = require('./mocked-urls.validation-middleware');
+const {
+  validateCreationFields,
+  validateUpdateFields,
+  validateDeleteParam,
+} = require('./mocked-urls.validation-middleware');
 
 const router = express.Router();
 

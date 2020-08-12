@@ -12,38 +12,20 @@ const fieldsValidation = (req, res, next) => {
 };
 
 const validateCreationFields = [
-  body(['name', 'url'])
-    .trim()
-    .not().isEmpty()
-    .isString(),
-  body('port')
-    .not().isEmpty()
-    .isNumeric()
-    .toInt(),
+  body(['name', 'url']).trim().not().isEmpty().isString(),
+  body('port').not().isEmpty().isNumeric().toInt(),
   fieldsValidation,
 ];
 
 const validateUpdateFields = [
-  param('name')
-    .trim()
-    .not().isEmpty()
-    .isString(),
-  body('url')
-    .trim()
-    .not().isEmpty()
-    .isString(),
-  body('port')
-    .not().isEmpty()
-    .isNumeric()
-    .toInt(),
+  param('name').trim().not().isEmpty().isString(),
+  body('url').trim().not().isEmpty().isString(),
+  body('port').not().isEmpty().isNumeric().toInt(),
   fieldsValidation,
 ];
 
 const validateDeleteParam = [
-  param('name')
-    .trim()
-    .not().isEmpty()
-    .isString(),
+  param('name').trim().not().isEmpty().isString(),
   fieldsValidation,
 ];
 

@@ -27,9 +27,7 @@ function getTapeDir(req) {
 async function getLastEntry(tapeDir) {
   return Math.max(
     0,
-    ...(await fs.readdir(tapeDir))
-      .map(Number)
-      .filter((n) => !Number.isNaN(n)),
+    ...(await fs.readdir(tapeDir)).map(Number).filter((n) => !Number.isNaN(n))
   );
 }
 
@@ -50,9 +48,11 @@ function record() {
     const { tapeDir } = getTapeDir(req);
 
     await fs.mkdir(tapeDir, { recursive: true });
-    req.socket.pipe(createWriteStream(
-      join(tapeDir, (await getLastEntry(tapeDir) + 1).toString()),
-    ));
+    req.socket.pipe(
+      createWriteStream(
+        join(tapeDir, ((await getLastEntry(tapeDir)) + 1).toString())
+      )
+    );
   });
 }
 
@@ -72,11 +72,9 @@ function play() {
     serverState[hash] = currentEntry + 1;
     try {
       const lastEntry = await getLastEntry(tapeDir);
-      const nextEntry = currentEntry % lastEntry === 0
-        ? lastEntry
-        : currentEntry % lastEntry;
-      createReadStream(join(tapeDir, nextEntry.toString()))
-        .pipe(res.socket);
+      const nextEntry =
+        currentEntry % lastEntry === 0 ? lastEntry : currentEntry % lastEntry;
+      createReadStream(join(tapeDir, nextEntry.toString())).pipe(res.socket);
     } catch (error) {
       console.error(`Unknown request ${hash}`);
       res.socket.write('HTTP/1.1 501 Not Implemented\n\n');
