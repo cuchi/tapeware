@@ -1,13 +1,6 @@
-const {saveMockedUrls, getMockedUrls} = require("./mocked-urls.repository");
+const { saveMockedUrls, getMockedUrls } = require('./mocked-urls.repository');
 
-const createMockedUrl = (req) => {
-  const {name, url, port} = req.body;
-  const createDto = {name, url, port};
-
-  updateMockedUrl(createDto);
-}
-
-const updateMockedUrl = ({name, url, port}) => {
+const updateMockedUrl = ({ name, url, port }) => {
   const urls = getMockedUrls();
 
   urls[name] = {
@@ -16,27 +9,34 @@ const updateMockedUrl = ({name, url, port}) => {
     port: +port,
   };
 
-  const saveDto = {content: urls};
+  const saveDto = { content: urls };
 
   saveMockedUrls(saveDto);
 };
 
+const createMockedUrl = (req) => {
+  const { name, url, port } = req.body;
+  const createDto = { name, url, port };
+
+  updateMockedUrl(createDto);
+};
+
 const nameExists = (name) => {
   const config = getMockedUrls();
-  return Boolean(config[name])
-}
+  return Boolean(config[name]);
+};
 
 const deleteMockedUrl = (name) => {
   const urls = getMockedUrls();
   delete urls[name];
 
-  const saveDto = {content: urls};
+  const saveDto = { content: urls };
   saveMockedUrls(saveDto);
-}
+};
 
 module.exports = {
   createMockedUrl,
   updateMockedUrl,
   nameExists,
-  deleteMockedUrl
-}
+  deleteMockedUrl,
+};

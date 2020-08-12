@@ -1,7 +1,7 @@
 {
   "name": "tapeware",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "app.js",
   "author": "Paulo Henrique Cuchi <paulo.cuchi@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -11,5 +11,10 @@
     "http-proxy": "^1.18.1",
     "object-hash": "^2.0.3",
     "ssl-root-cas": "^1.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.6.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0"
   }
 }

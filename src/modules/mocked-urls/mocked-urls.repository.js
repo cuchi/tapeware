@@ -1,17 +1,15 @@
-const {join} = require("path");
-const fs = require("fs");
+const { join } = require('path');
+const fs = require('fs');
 
-const mockedUrlsPath = process.env.MOCKED_URLS_PATH || "mocked-urls.json";
+const mockedUrlsPath = process.env.MOCKED_URLS_PATH || 'mocked-urls.json';
 
-const getMockedUrls = () => {
-  return JSON.parse(fs.readFileSync(join(__dirname, mockedUrlsPath), "utf8"));
-};
+const getMockedUrls = () => JSON.parse(fs.readFileSync(join(__dirname, mockedUrlsPath), 'utf8'));
 
-const saveMockedUrls = ({content}) => {
+const saveMockedUrls = ({ content }) => {
   fs.writeFileSync(join(__dirname, mockedUrlsPath), JSON.stringify(content));
 };
 
 module.exports = {
   getMockedUrls,
-  saveMockedUrls
-}
+  saveMockedUrls,
+};
