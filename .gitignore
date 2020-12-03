@@ -1,2 +1,8 @@
 node_modules
 tapes
+
+build
+npm-debug.log
+.env
+.DS_Store
+.idea/
